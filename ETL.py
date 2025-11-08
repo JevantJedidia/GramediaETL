@@ -31,13 +31,16 @@ def initialLoad():
 
 def extract():
     ## Get json dengan request
+    print("Requesting data from API...")
     r_product = requests.get('https://dummyjson.com/products?limit=200')
     r_carts = requests.get('https://dummyjson.com/carts?limit=50')
 
     ## Load data products
+    print("Loading products data...")
     df_product = json_normalize(r_product.json()['products'])
 
     ## Load data carts
+    print("Loading carts data...")
     df_sales = pd.DataFrame()
     for item in r_carts.json()['carts']:
         random.seed(int(item['id']))
@@ -49,12 +52,16 @@ def extract():
     return df_product, df_sales
 
 def transform(df_product, df_sales):
+
+    print("Transforming data...")
+    
     ## Ekstrak kolom yang penting
     df_product = df_product[['id','title','description','category','price']]
     df_sales = df_sales[['id','title','price','quantity','transaction_date','cartID']]
 
     ## Normalisasi kategori produk
-    df_product['category_id'] = df_product['category'].astype('category').cat.codes + 1
+    with pd.option_context('mode.chained_assignment', None):
+        df_product['category_id'] = df_product['category'].astype('category').cat.codes + 1
 
     ## Join data product dan sales untuk mendapatkan informasi penuh
     df_merge = pd.merge(df_product,df_sales,on='id',how='inner')
@@ -76,12 +83,16 @@ def transform(df_product, df_sales):
     return df_final
 
 def load(df_final):
+
+    print("Loading data into database...")
+
     conn = sqlite3.connect("Ecommerce.db")
     conn.execute("DELETE FROM sales")
 
     ## Insert data ke database
     try:
         df_final.to_sql('sales',conn,if_exists='append')
+        print("Load succeed!")
     except Exception as e:
         print("Error: ", e)
 
