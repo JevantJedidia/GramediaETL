@@ -7,7 +7,7 @@ pip install -r requirement.txt
 
 ## Description of ETL Logic
 ### Source data
-Data yang digunakan bersumber dari https://dummyjson.com/products dan https://dummyjson.com/carts. Karena data carts tidak memiliki transaction_date, maka tanggal transaksi digenerasi secara acak berdasarkan nilai carts_id. Rentang waktu yang digunakan untuk generasi tanggal adalah 1 Oktober 2025 sampai 30 Oktober 2025.
+Data yang digunakan bersumber dari https://dummyjson.com/products dan https://dummyjson.com/carts. Karena data carts tidak memiliki transaction_date, maka tanggal transaksi digenerasi secara acak berdasarkan nilai carts_id. Rentang waktu yang digunakan untuk generasi tanggal adalah 1 Oktober 2025 sampai 31 Oktober 2025. Secara otomatis, timestamp data transaksi memiliki timezone yang konsisten, yaitu WIB.
 
 ## Transformasi data
 Normalisasi kategori produk dilakukan dengan menggunakan fungsi 'astype('category').cat.codes' dengan pemetaan category sebagai berikut:
@@ -41,9 +41,9 @@ Normalisasi kategori produk dilakukan dengan menggunakan fungsi 'astype('categor
 Data product dan sales digabung dengan melakukan inner join pada kolom product_id. Transaction_id digenerasi secara incremental dengan urutan berdasarkan transaction_date dan category_id.
 
 ## Load data
-Data diload ke database berbasis SQLite3. Pada database Ecommerce, terdapat 2 tabel, sales dan category. Tabel category menampung pemetaan category_id dan category, sedangkan tabel sales menampung data transaksi yang sudah diproses.
+Database yang digunakan berbasis SQLite3. Pada database Ecommerce, terdapat 2 tabel, sales dan category. Tabel category menampung pemetaan category_id dan category, sedangkan tabel sales menampung data transaksi yang sudah diproses.
 
-Pada saat dilakukan load ke tabel sales, apabila terdapat data yang tidak valid, maka proses load dibatalkan dan pesan error akan ditampilkan. Sebelum proses load, data pada tabel sales dibersihkan terlebih dahulu agar data baru dapat dimasukkan tanpa melanggar primary key constraint.
+Pada saat dilakukan load ke tabel sales, apabila terdapat data yang tidak valid, maka proses load dibatalkan dan pesan error akan ditampilkan. Proses pemasukan data ke database menggunakan skema delete-insert. Status proses ETL serta timestamp ditampung di log.csv
 
 ## Visualisasi data
 visual.ipynb menampung 2 visualisasi data transaksi, total_sales per tanggal dan total_sales per category.
@@ -64,3 +64,6 @@ CREATE TABLE IF NOT EXISTS sales (
 )     
 ```
 Apabila pada proses load terdapat data yang tidak valid, pesan error akan ditampilkan. Pengecekan validasi dapat dilakukan dengan menghapus komentar di fungsi Load bagian Validation test
+
+## Diagram ETL
+![ETL](Diagram.png)

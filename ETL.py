@@ -3,6 +3,7 @@ import pandas as pd
 import json
 import random
 import sqlite3
+import csv
 from pandas import json_normalize
 from datetime import datetime, timedelta
 
@@ -74,14 +75,15 @@ def transform(ext):
             'price_y': 'price', 
         }
     )
-    df_merge['total_sales'] = df_merge['quantity']*df_merge['price']
+    df_merge['total_sales'] = df_merge['quantity']*df_merge['price'] # Hitung total_sales
+
+    # Urut data bdsrkn transaction_date dan category_id kemudian tambahkan transaction_id bdsrkn urutan tersebut
     df_merge.sort_values(by=['transaction_date','category_id'], ascending=[True,True], inplace=True)
     df_merge.insert(0,'transaction_id', range(1,len(df_merge)+1))
 
     ## Tambahkan transaction_id & restruktur data agar dapat dimasukkan ke database 
     df_final = df_merge[['transaction_id','product_id','product_name','category_id','quantity','price','total_sales','transaction_date']].rename(
         columns={'category_id':'category'})
-    # df_final.set_index('transaction_id',inplace=True)
 
     return df_final
 
@@ -123,8 +125,10 @@ def load(df_final):
     try:
         df_final.to_sql('sales',conn,if_exists='append',index=False)
         print("Load succeed!")
+        status = 'ETL finished succesfully'
     except Exception as e:
         print("Error: ", e)
+        status = e
 
     ## Output data ke file .sql
     with open("sales.sql", "w", encoding="utf-8") as f:
@@ -133,8 +137,14 @@ def load(df_final):
 
     conn.close()
 
+    return status
+
 initialLoad()
 ext = extract()
 final = transform(ext)
-load(final)
+msg = load(final)
 
+## Log ETL process
+with open('log.csv',mode='a',newline="") as file:
+    writer = csv.writer(file)
+    writer.writerows([[datetime.now().strftime("%Y-%m-%d %H:%M:%S"),msg]])
