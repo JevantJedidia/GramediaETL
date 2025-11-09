@@ -3,6 +3,7 @@
 Run
 ```bash
 pip install -r requirement.txt
+py ETL.py
 ```
 
 ## Description of ETL Logic
