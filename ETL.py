@@ -49,12 +49,15 @@ def extract():
         df_temp['cartID'] = item['id']
         df_sales = pd.concat([df_sales,df_temp],ignore_index=True)  
 
-    return df_product, df_sales
+    return [df_product, df_sales]
 
-def transform(df_product, df_sales):
+def transform(ext):
 
     print("Transforming data...")
-    
+
+    df_product = ext[0]
+    df_sales = ext[1]
+
     ## Ekstrak kolom yang penting
     df_product = df_product[['id','title','description','category','price']]
     df_sales = df_sales[['id','title','price','quantity','transaction_date','cartID']]
@@ -78,7 +81,7 @@ def transform(df_product, df_sales):
     ## Tambahkan transaction_id & restruktur data agar dapat dimasukkan ke database 
     df_final = df_merge[['transaction_id','product_id','product_name','category_id','quantity','price','total_sales','transaction_date']].rename(
         columns={'category_id':'category'})
-    df_final.set_index('transaction_id',inplace=True)
+    # df_final.set_index('transaction_id',inplace=True)
 
     return df_final
 
@@ -89,9 +92,36 @@ def load(df_final):
     conn = sqlite3.connect("Ecommerce.db")
     conn.execute("DELETE FROM sales")
 
+    ## Validation test
+    ### Duplicate ID
+    # df_final = pd.concat([df_final,pd.DataFrame({ 
+    #     "transaction_id": [1],
+    #     "quantity": [10],
+    #     "price": [10],
+    #     "product_name": ["test"],
+    #     "product_id":[1]
+    # })])
+    
+    ### Missing product name
+    # df_final = pd.concat([df_final,pd.DataFrame({ 
+    #     "transaction_id": [999],
+    #     "quantity": [10],
+    #     "price": [10],
+    #     "product_id":[1]
+    # })])
+
+    ### Qty & price = 0
+    # df_final = pd.concat([df_final,pd.DataFrame({ 
+    #     "transaction_id": [999],
+    #     "quantity": [0],
+    #     "price": [0],
+    #     "product_name":["test"],
+    #     "product_id":[1]
+    # })])    
+
     ## Insert data ke database
     try:
-        df_final.to_sql('sales',conn,if_exists='append')
+        df_final.to_sql('sales',conn,if_exists='append',index=False)
         print("Load succeed!")
     except Exception as e:
         print("Error: ", e)
@@ -104,7 +134,7 @@ def load(df_final):
     conn.close()
 
 initialLoad()
-prod, sales = extract()
-final = transform(prod, sales)
+ext = extract()
+final = transform(ext)
 load(final)
 

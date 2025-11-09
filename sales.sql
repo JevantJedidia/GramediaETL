@@ -1,4 +1,32 @@
 BEGIN TRANSACTION;
+CREATE TABLE category (
+    category_id INTEGER PRIMARY KEY,
+    category TEXT
+);
+INSERT INTO "category" VALUES(1,'beauty');
+INSERT INTO "category" VALUES(2,'fragrances');
+INSERT INTO "category" VALUES(3,'furniture');
+INSERT INTO "category" VALUES(4,'groceries');
+INSERT INTO "category" VALUES(5,'home-decoration');
+INSERT INTO "category" VALUES(6,'kitchen-accessories');
+INSERT INTO "category" VALUES(7,'laptops');
+INSERT INTO "category" VALUES(8,'mens-shirts');
+INSERT INTO "category" VALUES(9,'mens-shoes');
+INSERT INTO "category" VALUES(10,'mens-watches');
+INSERT INTO "category" VALUES(11,'mobile-accessories');
+INSERT INTO "category" VALUES(12,'motorcycle');
+INSERT INTO "category" VALUES(13,'skin-care');
+INSERT INTO "category" VALUES(14,'smartphones');
+INSERT INTO "category" VALUES(15,'sports-accessories');
+INSERT INTO "category" VALUES(16,'sunglasses');
+INSERT INTO "category" VALUES(17,'tablets');
+INSERT INTO "category" VALUES(18,'tops');
+INSERT INTO "category" VALUES(19,'vehicle');
+INSERT INTO "category" VALUES(20,'womens-bags');
+INSERT INTO "category" VALUES(21,'womens-dresses');
+INSERT INTO "category" VALUES(22,'womens-jewellery');
+INSERT INTO "category" VALUES(23,'womens-shoes');
+INSERT INTO "category" VALUES(24,'womens-watches');
 CREATE TABLE sales (
     transaction_id INTEGER PRIMARY KEY,
     product_id INTEGER NOT NULL,
